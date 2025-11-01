@@ -1,11 +1,7 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
 const ASSISTANT_SYSTEM_INSTRUCTION = `You are an AI assistant inside a Household Expense & Grocery Management Web App.
 Your role is to generate smart, useful, and unique outputs that help users save money, eat healthier, and manage expenses efficiently.
@@ -81,6 +77,14 @@ ASSISTANT:
 `;
 
 export const getAssistantResponse = async (query: string): Promise<any> => {
+    if (!apiKey) {
+        return {
+            feature: 'Error',
+            summary: 'Gemini API key missing. Set VITE_GEMINI_API_KEY in .env.local.',
+            output: { details: 'Create .env.local with VITE_GEMINI_API_KEY=your_key' }
+        };
+    }
+    const ai = new GoogleGenAI({ apiKey });
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',

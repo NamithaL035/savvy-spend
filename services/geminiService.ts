@@ -1,12 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { GROCERY_PLANNER_SYSTEM_INSTRUCTION } from '../constants';
 
-// Ensure the API key is available
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
 export interface GroceryItem {
     name: string;
@@ -22,6 +17,10 @@ export interface GroceryList {
 }
 
 export const getGroceryAdvice = async (query: string): Promise<GroceryList> => {
+    if (!apiKey) {
+        throw new Error("Missing VITE_GEMINI_API_KEY. Create a .env.local with VITE_GEMINI_API_KEY=your_key.");
+    }
+    const ai = new GoogleGenAI({ apiKey });
     let rawText = '';
     try {
         const response = await ai.models.generateContent({

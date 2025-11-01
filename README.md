@@ -12,9 +12,18 @@ View your app in AI Studio: https://ai.studio/apps/drive/1-yxMD8zHXM_2aMHnJ9-Qo1
 
 **Prerequisites:**  Node.js
 
+## Setup
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Install Tailwind CSS plugin for Vite:
+   `npm install tailwindcss @tailwindcss/vite`
+3. Create a `.env.local` in the project root and set your Gemini API key using Vite's env naming:
+   `VITE_GEMINI_API_KEY=your_key_here`
+4. Start the app:
    `npm run dev`
+
+If you see a blank page, check:
+- `vite.config.ts` has `base: './'` and includes the Tailwind plugin.
+- `index.html` uses `./index.tsx` (relative path) and does not include external import maps/CDN.
+- Browser DevTools console for 404s or module load errors.
