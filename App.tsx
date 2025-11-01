@@ -9,6 +9,8 @@ import AiAssistant from './components/AiAssistant';
 import MyPlansView from './components/MyPlansView';
 import OnboardingWizard from './components/OnboardingWizard';
 import ConfigurationView from './components/ConfigurationView';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 import { SavedPlan, Transaction } from './types';
 
 const App: React.FC = () => {
@@ -21,6 +23,8 @@ const App: React.FC = () => {
         return 'light';
     });
 
+    const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('isAuthenticated') === 'true');
+    const [authPage, setAuthPage] = useState<'signin' | 'signup'>('signin');
     const [hasOnboarded, setHasOnboarded] = useState(() => localStorage.getItem('hasOnboarded') === 'true');
     
     const [userProfile, setUserProfile] = useState(() => {
@@ -132,24 +136,46 @@ const App: React.FC = () => {
         localStorage.setItem('theme', theme);
     }, [theme]);
 
+    useEffect(() => {
+        const body = window.document.body;
+        if (!isAuthenticated) {
+            body.classList.add('auth-page');
+        } else {
+            body.classList.remove('auth-page');
+        }
+    }, [isAuthenticated]);
+
 
     const toggleTheme = () => {
         setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
     };
 
+    const handleSignIn = () => {
+        localStorage.setItem('isAuthenticated', 'true');
+        setIsAuthenticated(true);
+    };
+
+    const handleSignUp = () => {
+        localStorage.setItem('isAuthenticated', 'true');
+        setIsAuthenticated(true);
+    };
+
     const handleLogout = () => {
         // Clear all app-related data from localStorage
+        localStorage.removeItem('isAuthenticated');
         localStorage.removeItem('hasOnboarded');
         localStorage.removeItem('transactions');
         localStorage.removeItem('savedPlans');
         localStorage.removeItem('userProfile');
 
-        // Reset state to force re-onboarding
+        // Reset state to force re-authentication
+        setIsAuthenticated(false);
         setHasOnboarded(false);
         setTransactions([]);
         setSavedPlans([]);
         setUserProfile({ familySize: '2', diet: 'Vegetarian' });
         setActiveView('Dashboard');
+        setAuthPage('signin');
     };
 
     const renderView = () => {
@@ -176,6 +202,26 @@ const App: React.FC = () => {
         }
     };
 
+    // Show authentication pages if not authenticated
+    if (!isAuthenticated) {
+        return (
+            <div className={theme}>
+                {authPage === 'signin' ? (
+                    <SignIn 
+                        onSignIn={handleSignIn} 
+                        onSwitchToSignUp={() => setAuthPage('signup')} 
+                    />
+                ) : (
+                    <SignUp 
+                        onSignUp={handleSignUp} 
+                        onSwitchToSignIn={() => setAuthPage('signin')} 
+                    />
+                )}
+            </div>
+        );
+    }
+
+    // Show onboarding if authenticated but not onboarded
     if (!hasOnboarded) {
         return <OnboardingWizard onComplete={handleOnboardingComplete} />;
     }
